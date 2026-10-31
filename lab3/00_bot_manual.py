@@ -35,7 +35,7 @@ def leer_mensajes():
 
 def decidir(texto):
     """DECIDIR: elige la respuesta según el texto recibido."""
-    texto = texto.strip().lower()
+    texto = texto.strip().lower().strip("¡!¿?.,")       # sin puntuación: "Hola!" = "hola"
     if texto == "hola":
         return "¡Hola! Soy un bot hecho a mano 🤖"
     if texto == "hora":
@@ -60,16 +60,19 @@ vistos = {m["id"] for m in leer_mensajes()}
 print("Bot manual iniciado como", correo_bot, "- conversa con", PERSONA)
 print("Escríbele desde Webex. Para detenerlo: Ctrl+C")
 
-while True:
-    time.sleep(ESPERA)
-    for m in reversed(leer_mensajes()):            # del más antiguo al más nuevo
-        if m["id"] in vistos:
-            continue
-        vistos.add(m["id"])
-        if m["personEmail"] == correo_bot:         # lo escribió el propio bot
-            continue
-        texto = m.get("text", "")
-        print("[RECIBIDO]", m["personEmail"], "->", texto)
-        respuesta = decidir(texto)
-        responder(respuesta)
-        print("[ENVIADO] ", respuesta)
+try:
+    while True:
+        time.sleep(ESPERA)
+        for m in reversed(leer_mensajes()):            # del más antiguo al más nuevo
+            if m["id"] in vistos:
+                continue
+            vistos.add(m["id"])
+            if m["personEmail"] == correo_bot:         # lo escribió el propio bot
+                continue
+            texto = m.get("text", "")
+            print("[RECIBIDO]", m["personEmail"], "->", texto)
+            respuesta = decidir(texto)
+            responder(respuesta)
+            print("[ENVIADO] ", respuesta)
+except KeyboardInterrupt:                      # Ctrl+C: se detiene sin mostrar el error
+    print("\nBot detenido.")

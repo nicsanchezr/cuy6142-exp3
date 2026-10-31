@@ -25,4 +25,7 @@ bot.add_command(Encuesta())
 bot.help_command = AsistenteIA(ayuda=bot.help_command)
 
 print("Bot con IA iniciado. Escríbele desde Webex. Para detenerlo: Ctrl+C")
-bot.run()
+try:
+    bot.run()
+except KeyboardInterrupt:           # Ctrl+C: se detiene sin mostrar el error
+    print("\nBot detenido.")

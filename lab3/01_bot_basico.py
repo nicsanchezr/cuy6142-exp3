@@ -24,4 +24,7 @@ bot.add_command(CrearSala())
 bot.add_command(Encuesta())
 
 print("Bot iniciado. Escríbele desde Webex. Para detenerlo: Ctrl+C")
-bot.run()
+try:
+    bot.run()
+except KeyboardInterrupt:           # Ctrl+C: se detiene sin mostrar el error
+    print("\nBot detenido.")
