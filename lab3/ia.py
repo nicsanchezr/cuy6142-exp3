@@ -17,46 +17,56 @@ ROL = ("Eres el asistente de un curso de telepresencia y colaboración de Duoc U
        "Si no sabes algo, lo dices.")
 
 
-def preguntar_ia(texto):
-    """Envía el texto al modelo y devuelve su respuesta como texto."""
-    try:
-        respuesta = requests.post(
-            URL_OPENROUTER,
-            headers={"Authorization": f"Bearer {cargar_variable('OPENROUTER_API_KEY')}"},
-            json={
-                "model": cargar_variable("OPENROUTER_MODELO", obligatoria=False,
-                                         por_defecto="openrouter/free"),
-                "messages": [
-                    {"role": "system", "content": ROL},
-                    {"role": "user", "content": texto},
-                ],
-                "max_tokens": 1500,
-                # Algunos modelos gratuitos "razonan" antes de responder y ese
-                # razonamiento gasta tokens: se limita para que quede espacio
-                # para la respuesta, y no se incluye en lo que devuelve la API.
-                "reasoning": {"effort": "low", "exclude": True},
-            },
-            timeout=60,
-        )
-    except requests.exceptions.RequestException as error:
-        print("[IA] Error de conexión:", error)
-        return "No pude conectarme con la IA. Intenta de nuevo en un momento."
+def consultar_modelo(texto):
+    """Hace una solicitud a OpenRouter y devuelve la respuesta HTTP."""
+    return requests.post(
+        URL_OPENROUTER,
+        headers={"Authorization": f"Bearer {cargar_variable('OPENROUTER_API_KEY')}"},
+        json={
+            "model": cargar_variable("OPENROUTER_MODELO", obligatoria=False,
+                                     por_defecto="openrouter/free"),
+            "messages": [
+                {"role": "system", "content": ROL},
+                {"role": "user", "content": texto},
+            ],
+            "max_tokens": 1500,
+            # Algunos modelos gratuitos "razonan" antes de responder y ese
+            # razonamiento gasta tokens: se limita para que quede espacio
+            # para la respuesta, y no se incluye en lo que devuelve la API.
+            "reasoning": {"effort": "low", "exclude": True},
+        },
+        timeout=60,
+    )
 
-    if respuesta.status_code == 401:
-        return "La API key de OpenRouter no es válida: revisa el archivo .env."
-    if respuesta.status_code == 429:
-        return "Llegué al límite de consultas gratuitas. Intenta en un rato."
-    if respuesta.status_code != 200:
-        return f"La IA no respondió (HTTP {respuesta.status_code}). Intenta de nuevo."
 
-    datos = respuesta.json()
-    # El texto viene en choices[0].message.content. A veces llega vacío (None),
-    # por ejemplo si el modelo gastó todos sus tokens "pensando".
-    texto_respuesta = datos["choices"][0]["message"].get("content") or ""
-    if not texto_respuesta.strip():
-        print("[IA] Respuesta vacía del modelo:", datos.get("model"))
-        return "La IA no generó una respuesta esta vez. Vuelve a preguntar."
-    return texto_respuesta.strip()
+def preguntar_ia(texto, intentos=2):
+    """Envía el texto al modelo y devuelve su respuesta como texto.
+    Si el modelo responde vacío, lo intenta una vez más."""
+    for intento in range(1, intentos + 1):
+        try:
+            respuesta = consultar_modelo(texto)
+        except requests.exceptions.RequestException as error:
+            print("[IA] Error de conexión:", error)
+            return "No pude conectarme con la IA. Intenta de nuevo en un momento."
+
+        if respuesta.status_code == 401:
+            return "La API key de OpenRouter no es válida: revisa el archivo .env."
+        if respuesta.status_code == 429:
+            return "Llegué al límite de consultas gratuitas. Intenta en un rato."
+        if respuesta.status_code != 200:
+            return f"La IA no respondió (HTTP {respuesta.status_code}). Intenta de nuevo."
+
+        datos = respuesta.json()
+        eleccion = datos["choices"][0]
+        # El texto viene en choices[0].message.content. A veces llega vacío
+        # (None), por ejemplo si el modelo gastó todos sus tokens "pensando".
+        texto_respuesta = eleccion["message"].get("content") or ""
+        if texto_respuesta.strip():
+            return texto_respuesta.strip()
+        print("[IA] Respuesta vacía (intento {} de {}). Modelo: {}, motivo: {}".format(
+            intento, intentos, datos.get("model"), eleccion.get("finish_reason")))
+
+    return "La IA no generó una respuesta esta vez. Vuelve a preguntar."
 
 
 class AsistenteIA(Command):
