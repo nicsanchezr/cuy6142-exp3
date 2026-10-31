@@ -1,0 +1,5 @@
+# Secretos y archivos locales: nunca van al repositorio
+.env
+.venv/
+__pycache__/
+sala_id.txt

@@ -1,0 +1,195 @@
+{
+  "info": {
+    "name": "CUY6142 - Lab 3 - Bot de Webex",
+    "description": "Parte 2: actúa como el bot (token del bot). Parte 5: escríbele al bot como persona (token personal).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "token_bot",
+      "value": "pega_aqui_el_token_del_bot"
+    },
+    {
+      "key": "tu_email",
+      "value": "tu_correo@ejemplo.com"
+    },
+    {
+      "key": "token_personal",
+      "value": "pega_aqui_tu_token_personal"
+    },
+    {
+      "key": "bot_email",
+      "value": "bot_nombre_apellido@webex.bot"
+    }
+  ],
+  "item": [
+    {
+      "name": "Parte 2 - El bot por dentro (token del bot)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token_bot}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "1. ¿Quién es el bot?",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://webexapis.com/v1/people/me",
+              "protocol": "https",
+              "host": [
+                "webexapis",
+                "com"
+              ],
+              "path": [
+                "v1",
+                "people",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. El bot te escribe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://webexapis.com/v1/messages",
+              "protocol": "https",
+              "host": [
+                "webexapis",
+                "com"
+              ],
+              "path": [
+                "v1",
+                "messages"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toPersonEmail\": \"{{tu_email}}\",\n  \"text\": \"Hola, soy tu bot 👋 ¿Me respondes?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "3. Leer la conversación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://webexapis.com/v1/messages/direct?personEmail={{tu_email}}",
+              "protocol": "https",
+              "host": [
+                "webexapis",
+                "com"
+              ],
+              "path": [
+                "v1",
+                "messages",
+                "direct"
+              ],
+              "query": [
+                {
+                  "key": "personEmail",
+                  "value": "{{tu_email}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Parte 5 - Escribirle al bot (token personal)",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token_personal}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "1. Enviar mensaje al bot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://webexapis.com/v1/messages",
+              "protocol": "https",
+              "host": [
+                "webexapis",
+                "com"
+              ],
+              "path": [
+                "v1",
+                "messages"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"toPersonEmail\": \"{{bot_email}}\",\n  \"text\": \"hola\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "2. Ver la conversación con el bot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://webexapis.com/v1/messages/direct?personEmail={{bot_email}}",
+              "protocol": "https",
+              "host": [
+                "webexapis",
+                "com"
+              ],
+              "path": [
+                "v1",
+                "messages",
+                "direct"
+              ],
+              "query": [
+                {
+                  "key": "personEmail",
+                  "value": "{{bot_email}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Secretos: los tokens nunca van al repositorio
+.env
+__pycache__/
+.venv/

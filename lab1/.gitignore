@@ -1,0 +1,5 @@
+# Secretos: el token nunca va al repositorio
+.env
+# Archivos que genera cada estudiante
+sala_id.txt
+__pycache__/
