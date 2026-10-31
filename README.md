@@ -2,7 +2,7 @@
 
 Repositorio oficial de materiales de la **Experiencia 3** de CUY6142 (Telepresencia y entornos innovadores de colaboración humana), Escuela de Informática y Telecomunicaciones, DUOC UC.
 
-Aquí están los scripts de los laboratorios. **Tu trabajo no se guarda aquí**: lo guardas en tu propio repositorio `cuy6142-webex`.
+Aquí están los scripts de los laboratorios: clónalo en la VM DEVASC y trabaja directamente en la carpeta de cada laboratorio.
 
 ## Contenido
 
@@ -15,33 +15,36 @@ Aquí están los scripts de los laboratorios. **Tu trabajo no se guarda aquí**:
 
 ## Al comenzar cada sesión en la VM DEVASC
 
-Los equipos del laboratorio se restauran al reiniciar: lo que no esté en GitHub se pierde. Por eso, al comenzar, clonas los dos repositorios y copias la carpeta del laboratorio a tu repositorio (ejemplo con `lab3`; reemplaza `TU_USUARIO`):
+Los equipos del laboratorio se restauran al reiniciar: lo que modifiques en la VM se pierde. Al comenzar cada sesión, clona el repositorio y entra a la carpeta del laboratorio (ejemplo con `lab3`):
 
 ```bash
 mkdir -p ~/labs
 cd ~/labs
 git clone https://github.com/nicsanchezr/cuy6142-exp3.git
-git clone https://github.com/TU_USUARIO/cuy6142-webex.git
-cp -rn cuy6142-exp3/lab3 cuy6142-webex/
-cd cuy6142-webex/lab3
+cd cuy6142-exp3/lab3
 ```
 
-`cp -rn` copia los archivos que te falten **sin sobrescribir** los que ya modificaste en sesiones anteriores.
+Luego crea tu `.env` a partir de `.env.ejemplo`. Los tokens nunca se suben a GitHub.
 
-Luego crea tu `.env` a partir de `.env.ejemplo` (los tokens nunca se suben a GitHub).
-
-## Al terminar cada sesión
+En el laboratorio 3.3.2, prepara el entorno de Python 3.12 desde la carpeta `lab3`:
 
 ```bash
-cd ~/labs/cuy6142-webex
+bash ../preparar_entorno.sh
+source .venv/bin/activate
+```
+
+## Guardar tu trabajo en GitHub (opcional)
+
+Si quieres conservar tus scripts, crea en GitHub un repositorio propio `cuy6142-webex` (con README) y, al terminar la sesión, copia tu carpeta y súbela (reemplaza `TU_USUARIO`):
+
+```bash
+cd ~/labs
+git clone https://github.com/TU_USUARIO/cuy6142-webex.git
+rsync -a --exclude .venv cuy6142-exp3/lab3 cuy6142-webex/
+cd cuy6142-webex
 git add .
 git commit -m "Avance del laboratorio"
 git push
 ```
 
-## Nunca subas a GitHub
-
-- El archivo `.env` (tus tokens y API keys).
-- La carpeta `.venv`.
-
-El `.gitignore` de cada laboratorio ya los excluye.
+El `.gitignore` de cada laboratorio evita que se suban el `.env` y la carpeta `.venv`.

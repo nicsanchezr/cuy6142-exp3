@@ -3,12 +3,12 @@
 # Deja listo el entorno del laboratorio 3.3.2 en la carpeta donde lo ejecutes:
 #   1. instala uv (si falta), 2. instala Python 3.12,
 #   3. crea el entorno virtual .venv y 4. instala las librerías de requirements.txt.
-# Uso (dentro de tu carpeta lab3):  bash ~/labs/cuy6142-exp3/preparar_entorno.sh
+# Uso (dentro de la carpeta lab3):  bash ../preparar_entorno.sh
 set -e
 
 if [ ! -f requirements.txt ]; then
     echo "[ERROR] No encuentro requirements.txt. Entra primero a tu carpeta lab3:"
-    echo "        cd ~/labs/cuy6142-webex/lab3"
+    echo "        cd ~/labs/cuy6142-exp3/lab3"
     exit 1
 fi
 
