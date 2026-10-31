@@ -33,6 +33,20 @@ bash ../preparar_entorno.sh
 source .venv/bin/activate
 ```
 
+## Alternativa: Windows con VS Code o VSCodium
+
+1. Instala Python 3.12 desde https://www.python.org/downloads/ (marca **Add python.exe to PATH**) y VS Code (https://code.visualstudio.com) o VSCodium (https://vscodium.com).
+2. Clona el repositorio (o usa **Code › Download ZIP**) y abre la carpeta del laboratorio con **File › Open Folder**.
+3. En **Terminal › New Terminal** (PowerShell) instala las librerías. En Windows no hace falta entorno virtual:
+
+```powershell
+py -3.12 -m pip install -r requirements.txt
+copy .env.ejemplo .env
+py -3.12 00_bot_manual.py
+```
+
+En Windows, los scripts se ejecutan con `py -3.12` en vez de `python3`.
+
 ## Guardar tu trabajo en GitHub (opcional)
 
 Si quieres conservar tus scripts, crea en GitHub un repositorio propio `cuy6142-webex` (con README) y, al terminar la sesión, copia tu carpeta y súbela (reemplaza `TU_USUARIO`):
