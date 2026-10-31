@@ -17,7 +17,7 @@ ROL = ("Eres el asistente de un curso de telepresencia y colaboración de Duoc U
        "Si no sabes algo, lo dices.")
 
 
-def consultar_modelo(texto):
+def consultar_modelo(texto, rol):
     """Hace una solicitud a OpenRouter y devuelve la respuesta HTTP."""
     return requests.post(
         URL_OPENROUTER,
@@ -26,7 +26,7 @@ def consultar_modelo(texto):
             "model": cargar_variable("OPENROUTER_MODELO", obligatoria=False,
                                      por_defecto="openrouter/free"),
             "messages": [
-                {"role": "system", "content": ROL},
+                {"role": "system", "content": rol},
                 {"role": "user", "content": texto},
             ],
             "max_tokens": 1500,
@@ -39,12 +39,13 @@ def consultar_modelo(texto):
     )
 
 
-def preguntar_ia(texto, intentos=2):
+def preguntar_ia(texto, rol=ROL, intentos=2):
     """Envía el texto al modelo y devuelve su respuesta como texto.
+    rol: instrucciones para el modelo (por defecto, el ROL del asistente).
     Si el modelo responde vacío, lo intenta una vez más."""
     for intento in range(1, intentos + 1):
         try:
-            respuesta = consultar_modelo(texto)
+            respuesta = consultar_modelo(texto, rol)
         except requests.exceptions.RequestException as error:
             print("[IA] Error de conexión:", error)
             return "No pude conectarme con la IA. Intenta de nuevo en un momento."
