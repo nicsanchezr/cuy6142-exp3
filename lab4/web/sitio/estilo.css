@@ -1,0 +1,23 @@
+/* Estilos del sitio de ejemplo "TeleAndes" (no necesitas modificarlos) */
+body { font-family: Arial, sans-serif; margin: 0; color: #1f2329; background: #f4f6fa; }
+header { background: #1f2329; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; }
+header .marca { font-size: 22px; font-weight: bold; }
+header nav a { color: #c9d6f2; margin-left: 20px; text-decoration: none; }
+.portada { background: linear-gradient(120deg, #2f55a8, #4e7cdd); color: #fff; padding: 48px 32px; }
+.portada h1 { margin: 0 0 10px; font-size: 32px; }
+.portada p { margin: 0; font-size: 18px; max-width: 640px; }
+.servicios { display: flex; gap: 20px; padding: 32px; flex-wrap: wrap; }
+.tarjeta { background: #fff; border: 1px solid #c9d6f2; border-radius: 10px; padding: 20px; width: 280px; }
+.tarjeta h2 { font-size: 18px; margin: 0 0 8px; color: #2f55a8; }
+.tarjeta p { font-size: 14px; color: #4a4f57; min-height: 60px; }
+.boton { background: #4e7cdd; color: #fff; border: 0; border-radius: 6px; padding: 10px 14px; font-size: 14px; cursor: pointer; margin-right: 6px; }
+.boton.secundario { background: #2e7d32; }
+footer { text-align: center; color: #4a4f57; font-size: 13px; padding: 20px; }
+/* Panel lateral de atención: aquí se muestra el widget */
+#panel-atencion { position: fixed; right: 20px; bottom: 20px; width: 430px; height: 640px; background: #fff;
+  border: 1px solid #c9d6f2; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.2); display: none; flex-direction: column; }
+#panel-atencion .barra { background: #2f55a8; color: #fff; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0; }
+#panel-atencion .barra button { background: transparent; color: #fff; border: 0; font-size: 18px; cursor: pointer; }
+#panel-atencion .config { padding: 8px 14px; background: #fff3e0; font-size: 12px; }
+#panel-atencion .config input { width: 100%; box-sizing: border-box; padding: 6px; margin-top: 4px; }
+#contenedor-widget { flex: 1; }

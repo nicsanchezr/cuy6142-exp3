@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CUY6142 · Prueba del widget de Webex</title>
+
+  <!-- Widget de espacio de Webex (Space Widget): estilos y código desde el CDN de Webex -->
+  <link rel="stylesheet" href="https://code.s4d.io/widget-space/production/main.css">
+  <script src="https://code.s4d.io/widget-space/production/bundle.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f4f6fa; color: #1f2329; }
+    header { background: #1f2329; color: #fff; padding: 14px 24px; }
+    header h1 { margin: 0; font-size: 20px; }
+    main { display: flex; gap: 20px; padding: 20px; flex-wrap: wrap; }
+    .panel { background: #fff; border: 1px solid #c9d6f2; border-radius: 8px; padding: 16px; width: 340px; }
+    label { display: block; font-weight: bold; margin-top: 12px; font-size: 14px; }
+    input, select { width: 100%; box-sizing: border-box; padding: 8px; margin-top: 4px; font-size: 14px; }
+    button { margin-top: 16px; padding: 10px 16px; font-size: 14px; border: 0; border-radius: 6px; cursor: pointer; }
+    #cargar { background: #4e7cdd; color: #fff; }
+    #quitar { background: #e0e4ea; }
+    .nota { font-size: 12px; color: #4a4f57; margin-top: 10px; }
+    .alerta { background: #fdecea; color: #c62828; padding: 10px; border-radius: 6px; font-size: 13px; display: none; }
+    #widget { width: 520px; height: 600px; border: 1px solid #c9d6f2; border-radius: 8px; background: #fff; }
+    #eventos { font-family: Consolas, monospace; font-size: 12px; height: 160px; overflow-y: auto;
+               background: #f4f6fa; border: 1px solid #c9d6f2; padding: 6px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header><h1>Prueba del widget de Webex</h1></header>
+  <main>
+    <section class="panel">
+      <div id="alerta" class="alerta"></div>
+
+      <label for="token">Tu token personal</label>
+      <input id="token" type="password" placeholder="Pega aquí tu token (sin la palabra Bearer)">
+
+      <label for="destino">Correo de tu compañero(a)</label>
+      <input id="destino" type="email" placeholder="correo@ejemplo.com">
+
+      <label for="actividad">Abrir el widget en</label>
+      <select id="actividad">
+        <option value="message">Mensajes (chat)</option>
+        <option value="meet">Llamada (video)</option>
+      </select>
+
+      <button id="cargar">Cargar widget</button>
+      <button id="quitar">Quitar widget</button>
+
+      <p class="nota">El token solo queda en la memoria de esta pestaña: no se guarda en ningún archivo.
+        Al cerrar o recargar la página, se borra.</p>
+
+      <label>Eventos del widget</label>
+      <div id="eventos"></div>
+    </section>
+
+    <!-- Zona donde se dibuja el widget -->
+    <div id="widget"></div>
+  </main>
+
+  <script>
+    var zona = document.getElementById("widget");
+    var actual = null;   // contenedor del widget cargado
+    var alerta = document.getElementById("alerta");
+
+    function avisar(texto) {
+      alerta.textContent = texto;
+      alerta.style.display = texto ? "block" : "none";
+    }
+
+    function registrar(nombre, detalle) {
+      // Muestra cada evento del widget (mensajes, llamadas...) en el panel
+      var linea = document.createElement("div");
+      linea.textContent = new Date().toLocaleTimeString() + "  " + nombre;
+      var caja = document.getElementById("eventos");
+      caja.prepend(linea);
+    }
+
+    // La cámara y el micrófono solo funcionan en páginas seguras (https:// o localhost)
+    if (!window.isSecureContext) {
+      avisar("Esta página no se abrió con https://. El chat puede funcionar, pero la llamada no: el navegador bloquea la cámara y el micrófono.");
+    }
+
+    document.getElementById("cargar").onclick = function () {
+      var token = document.getElementById("token").value.trim().replace(/^Bearer\s+/i, "");
+      var destino = document.getElementById("destino").value.trim();
+      if (!token || !destino) { avisar("Completa el token y el correo de tu compañero(a)."); return; }
+      if (typeof webex === "undefined" || !webex.widget) {
+        avisar("No se pudo cargar el código del widget desde code.s4d.io. Revisa tu conexión a Internet."); return;
+      }
+      avisar(window.isSecureContext ? "" : alerta.textContent);
+
+      quitarWidget().then(function () {
+        // Crea un contenedor nuevo y dibuja el widget dentro de él
+        actual = document.createElement("div");
+        actual.style.height = "100%";
+        zona.appendChild(actual);
+        webex.widget(actual).spaceWidget({
+          accessToken: token,                 // quién usa el widget (tú)
+          destinationType: "email",           // con quién se conversa: por correo
+          destinationId: destino,
+          initialActivity: document.getElementById("actividad").value,
+          onEvent: registrar                  // función que recibe los eventos
+        });
+        registrar("widget cargado para " + destino);
+      });
+    };
+
+    function quitarWidget() {
+      // Cierra las conexiones del widget anterior (si hay uno) y limpia la zona
+      var anterior = actual;
+      actual = null;
+      var listo = (anterior && typeof webex !== "undefined") ? webex.widget(anterior).remove() : Promise.resolve();
+      return listo.then(function () { zona.innerHTML = ""; });
+    }
+
+    document.getElementById("quitar").onclick = function () {
+      quitarWidget().then(function () { registrar("widget quitado"); });
+    };
+  </script>
+</body>
+</html>

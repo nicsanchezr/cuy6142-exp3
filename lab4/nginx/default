@@ -1,0 +1,26 @@
+# Configuración de nginx para el laboratorio 3.4.2 (CUY6142)
+# - El puerto 80 (http) redirige todo al 443 (https).
+# - El puerto 443 usa el certificado autofirmado creado en el Paso 2.1.
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    server_name _;
+
+    ssl_certificate     /etc/nginx/certificado/nginx.crt;
+    ssl_certificate_key /etc/nginx/certificado/nginx.key;
+
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}

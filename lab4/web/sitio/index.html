@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TeleAndes · Soluciones de comunicación para empresas</title>
+  <link rel="stylesheet" href="estilo.css">
+
+  <!-- ================================================================
+       PARTE A: agrega aquí las dos líneas que cargan el widget de Webex
+       ================================================================ -->
+
+</head>
+<body>
+  <header>
+    <div class="marca">TeleAndes</div>
+    <nav><a href="#">Inicio</a><a href="#">Servicios</a><a href="#">Contacto</a></nav>
+  </header>
+
+  <section class="portada">
+    <h1>Comunicaciones unificadas para tu empresa</h1>
+    <p>Telefonía IP, videoconferencia y mesa de ayuda en un solo lugar. Habla con un ejecutivo sin salir de esta página.</p>
+  </section>
+
+  <section class="servicios">
+    <div class="tarjeta">
+      <h2>Telefonía IP</h2>
+      <p>Centrales virtuales, anexos y números para todas tus sucursales.</p>
+      <button class="boton" onclick="abrirAtencion('message')">Escribir a un ejecutivo</button>
+    </div>
+    <div class="tarjeta">
+      <h2>Videoconferencia</h2>
+      <p>Salas de reuniones equipadas y licencias para equipos híbridos.</p>
+      <button class="boton secundario" onclick="abrirAtencion('meet')">Llamar a un ejecutivo</button>
+    </div>
+    <div class="tarjeta">
+      <h2>Mesa de ayuda</h2>
+      <p>Soporte técnico para tus usuarios, por chat o videollamada.</p>
+      <button class="boton" onclick="abrirAtencion('message')">Pedir ayuda</button>
+    </div>
+  </section>
+
+  <footer>TeleAndes es una empresa ficticia creada para el curso CUY6142 · Duoc UC</footer>
+
+  <!-- Panel de atención: se abre con los botones y muestra el widget -->
+  <aside id="panel-atencion">
+    <div class="barra">
+      <span>Atención a clientes</span>
+      <button onclick="cerrarAtencion()" title="Cerrar">✕</button>
+    </div>
+    <div class="config">
+      Modo laboratorio: pega tu token personal (solo queda en esta pestaña).
+      <input id="token" type="password" placeholder="Token personal de Webex">
+    </div>
+    <div id="contenedor-widget"></div>
+  </aside>
+
+  <script>
+    var panel = document.getElementById("panel-atencion");
+    var actual = null;   // contenedor del widget abierto
+
+    function cerrarAtencion() {
+      if (actual && typeof webex !== "undefined") { webex.widget(actual).remove(); }
+      actual = null;
+      document.getElementById("contenedor-widget").innerHTML = "";
+      panel.style.display = "none";
+    }
+
+    // ================================================================
+    // PARTE B: escribe aquí el correo del ejecutivo (tu compañero/a)
+    // ================================================================
+
+
+    // ================================================================
+    // PARTE C: pega aquí la función abrirAtencion(actividad)
+    // ================================================================
+
+  </script>
+</body>
+</html>

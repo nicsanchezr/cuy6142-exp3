@@ -29,8 +29,28 @@ def leer_mensajes():
         print("[429] Demasiadas consultas: espero", espera, "segundos")
         time.sleep(espera)
         return []
-    r.raise_for_status()
+    if r.status_code != 200:
+        explicar_error(r)
     return r.json()["items"]                       # el primero es el más reciente
+
+
+def explicar_error(r):
+    """Muestra qué significa el error de la API y detiene el script."""
+    causas = {
+        401: "El token no es válido: revisa WEBEX_BOT_TOKEN en el .env (sin espacios ni comillas).",
+        403: "Todavía no hay conversación entre el bot y ese correo: escríbele \"hola\" al bot desde la app "
+             "Webex y vuelve a ejecutar. Si ya le escribiste, revisa que el primer correo de USUARIOS_PERMITIDOS "
+             "sea exactamente el de tu cuenta Webex.",
+        404: "No hay conversación entre el bot y ese correo: escríbele primero al bot desde la app Webex "
+             "y revisa que el primer correo de USUARIOS_PERMITIDOS sea el tuyo.",
+    }
+    try:
+        detalle = r.json().get("message", "")
+    except ValueError:
+        detalle = r.text[:200]
+    print("[ERROR] HTTP {}: {}".format(r.status_code, detalle))
+    print("        " + causas.get(r.status_code, "Revisa el token y el correo del .env."))
+    raise SystemExit(1)
 
 
 def decidir(texto):
@@ -52,7 +72,12 @@ def responder(texto):
 
 # ¿Quién soy? Sirve para no responder a los mensajes del propio bot
 yo = requests.get(API + "/people/me", headers=ENCABEZADOS, timeout=10)
-yo.raise_for_status()
+if yo.status_code != 200:
+    explicar_error(yo)
+if yo.json().get("type") != "bot":
+    print("[ERROR] El token de WEBEX_BOT_TOKEN es de una persona ({}), no de un bot.".format(yo.json()["emails"][0]))
+    print("        Copia en el .env el token de tu bot (Paso 1.2 de la guía).")
+    raise SystemExit(1)
 correo_bot = yo.json()["emails"][0]
 
 # Los mensajes que ya estaban en la conversación no se responden

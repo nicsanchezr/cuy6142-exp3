@@ -11,6 +11,7 @@ Aquí están los scripts de los laboratorios: clónalo en la VM DEVASC y trabaja
 | `lab1/` | 3.1.2 Creando nuestro entorno de trabajo y desarrollo |
 | `lab2/` | 3.2.2 Gestionando salas, membresías y mensajes con la API de Webex |
 | `lab3/` | 3.3.2 Creando un bot para Webex con Python e IA |
+| `lab4/` | 3.4.2 Insertando un widget de video en una aplicación web (se publica en una EC2 del Learner Lab) |
 | `preparar_entorno.sh` | Instala Python 3.12 y las librerías del bot (laboratorio 3.3.2) |
 
 ## Al comenzar cada sesión en la VM DEVASC
@@ -46,6 +47,16 @@ py -3.12 00_bot_manual.py
 ```
 
 En Windows, los scripts se ejecutan con `py -3.12` en vez de `python3`.
+
+## Laboratorio 3.4.2: en el servidor EC2
+
+El laboratorio 3.4.2 se publica en una instancia EC2 del Learner Lab (Ubuntu 24.04 con nginx y HTTPS) y se prueba desde el navegador del equipo Windows, que tiene cámara y micrófono. En el servidor:
+
+```bash
+git clone https://github.com/nicsanchezr/cuy6142-exp3.git
+sudo cp cuy6142-exp3/lab4/nginx/default /etc/nginx/sites-available/default
+sudo cp -r cuy6142-exp3/lab4/web/* /var/www/html/
+```
 
 ## Guardar tu trabajo en GitHub (opcional)
 
