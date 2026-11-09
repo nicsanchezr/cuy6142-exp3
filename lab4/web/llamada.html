@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de videollamada con el SDK de Webex</title>
+<!-- SDK de Webex para navegador: crea el objeto global Webex -->
+<script src="https://unpkg.com/webex@3.12.0/umd/webex.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f8; color: #1d2a33; }
+  header { background: #1d2a33; color: #fff; padding: 14px 20px; font-size: 22px; font-weight: bold; }
+  main { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; }
+  .panel { background: #fff; border: 1px solid #d5dbe0; border-radius: 8px; padding: 18px; }
+  .form { width: 360px; }
+  label { display: block; font-weight: bold; margin: 12px 0 4px; }
+  input { width: 100%; box-sizing: border-box; padding: 8px; font-size: 15px; }
+  button { margin-top: 14px; padding: 9px 16px; font-size: 15px; border: 0; border-radius: 6px; cursor: pointer; }
+  #btn-unirse { background: #1170cf; color: #fff; }
+  #btn-salir { background: #dfe4e8; }
+  #log { height: 180px; overflow-y: auto; background: #f7f9fa; border: 1px solid #d5dbe0;
+         font-family: monospace; font-size: 13px; padding: 6px; white-space: pre-wrap; margin-top: 8px; }
+  .videos { flex: 1; min-width: 360px; }
+  video { width: 100%; background: #000; border-radius: 6px; }
+  #video-local { width: 35%; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header>Prueba de videollamada con el SDK de Webex</header>
+<main>
+  <div class="panel form">
+    <label for="token">Tu token personal</label>
+    <input id="token" type="password" autocomplete="off">
+    <label for="destino">Enlace de la sala personal</label>
+    <input id="destino" placeholder="https://duoc.webex.com/meet/usuario">
+    <button id="btn-unirse" onclick="unirse()">Unirse</button>
+    <button id="btn-salir" onclick="salir()">Salir</button>
+    <label>Eventos</label>
+    <div id="log"></div>
+  </div>
+  <div class="panel videos">
+    <video id="video-remoto" autoplay playsinline></video>
+    <audio id="audio-remoto" autoplay></audio>
+    <video id="video-local" autoplay playsinline muted></video>
+  </div>
+</main>
+<script>
+  var webex = null, reunion = null, microfono = null, camara = null;
+
+  function registrar(texto) {
+    var log = document.getElementById("log");
+    log.textContent = new Date().toLocaleTimeString() + " " + texto + "\n" + log.textContent;
+  }
+
+  async function unirse() {
+    var token = document.getElementById("token").value.trim();
+    var destino = document.getElementById("destino").value.trim();
+    if (!token || !destino) { registrar("Falta el token o el enlace."); return; }
+    if (!window.isSecureContext) { registrar("Aviso: la página no está en HTTPS; la cámara no funcionará."); }
+    var paso = "iniciar el SDK";
+    try {
+      // 1. Conectarse a Webex con el token y esperar a que el SDK esté listo
+      webex = Webex.init({ credentials: { access_token: token } });
+      await new Promise(function (listo) {
+        if (webex.ready) { listo(); } else { webex.once("ready", listo); }
+      });
+      registrar("SDK listo.");
+      paso = "registrar el dispositivo";
+      await webex.meetings.register();
+      registrar("Conectado a Webex.");
+
+      // 2. Crear la reunión a partir del enlace
+      paso = "buscar la reunión";
+      reunion = await webex.meetings.create(destino);
+      registrar("Reunión encontrada.");
+
+      // 3. Cuando llegue el audio o video de los demás, mostrarlo
+      reunion.on("media:ready", function (media) {
+        if (media.type === "remoteVideo") { document.getElementById("video-remoto").srcObject = media.stream; }
+        if (media.type === "remoteAudio") { document.getElementById("audio-remoto").srcObject = media.stream; }
+        registrar("Llegó " + media.type);
+      });
+      reunion.on("meeting:self:lobbyWaiting", function () {
+        registrar("En la sala de espera: el anfitrión debe admitirte.");
+      });
+      reunion.on("meeting:self:guestAdmitted", function () { registrar("Admitido en la reunión."); });
+
+      // 4. Abrir micrófono y cámara
+      //    Si el equipo no tiene alguno, se entra igual: solo se recibe.
+      paso = "abrir micrófono y cámara";
+      var locales = {};
+      try {
+        microfono = await webex.meetings.mediaHelpers.createMicrophoneStream({});
+        locales.microphone = microfono;
+        registrar("Micrófono listo.");
+      } catch (e) { registrar("Sin micrófono: entrarás sin enviar audio."); }
+      try {
+        camara = await webex.meetings.mediaHelpers.createCameraStream({});
+        locales.camera = camara;
+        document.getElementById("video-local").srcObject = camara.outputStream;
+        registrar("Cámara lista.");
+      } catch (e) { registrar("Sin cámara: entrarás sin enviar video."); }
+
+      // 5. Unirse a la reunión (sin audio ni video todavía)
+      paso = "unirse a la reunión";
+      await reunion.join();
+
+      // 6. Si quedamos en la sala de espera, esperar a que el anfitrión nos admita
+      if (reunion.isUserUnadmitted) {
+        await new Promise(function (admitido) {
+          reunion.on("meeting:self:guestAdmitted", admitido);
+        });
+      }
+
+      // 7. Ya admitidos: conectar audio y video
+      paso = "conectar audio y video";
+      await reunion.addMedia({ localStreams: locales });
+      registrar("Dentro de la reunión.");
+    } catch (e) {
+      registrar("Error al " + paso + ": " + (e && e.message ? e.message : e));
+      console.error("Falló el paso: " + paso, e);
+    }
+  }
+
+  async function salir() {
+    try {
+      if (reunion) { await reunion.leave(); }
+      if (camara) { camara.stop(); }
+      if (microfono) { microfono.stop(); }
+      if (webex) { await webex.meetings.unregister(); }
+      registrar("Saliste de la reunión.");
+    } catch (e) {
+      registrar("Error al salir: " + (e && e.message ? e.message : e));
+    }
+    reunion = null; camara = null; microfono = null;
+  }
+</script>
+</body>
+</html>

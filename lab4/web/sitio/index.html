@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="estilo.css">
 
   <!-- ================================================================
-       PARTE A: agrega aquí las dos líneas que cargan el widget de Webex
+       PARTE A: agrega aquí las líneas que cargan el widget y el SDK de Webex
        ================================================================ -->
 
 </head>
@@ -48,31 +48,30 @@
       <span>Atención a clientes</span>
       <button onclick="cerrarAtencion()" title="Cerrar">✕</button>
     </div>
-    <div class="config">
-      Modo laboratorio: pega tu token personal (solo queda en esta pestaña).
-      <input id="token" type="password" placeholder="Token personal de Webex">
-    </div>
     <div id="contenedor-widget"></div>
   </aside>
 
   <script>
     var panel = document.getElementById("panel-atencion");
-    var actual = null;   // contenedor del widget abierto
+    var actual = null;    // contenedor del widget de chat abierto
+    var reunion = null;   // videollamada en curso (SDK)
 
     function cerrarAtencion() {
       if (actual && typeof webex !== "undefined") { webex.widget(actual).remove(); }
       actual = null;
+      if (reunion) { reunion.leave(); reunion = null; }   // sale de la videollamada
       document.getElementById("contenedor-widget").innerHTML = "";
       panel.style.display = "none";
     }
 
     // ================================================================
-    // PARTE B: escribe aquí el correo del ejecutivo (tu compañero/a)
+    // PARTE B: datos de la cuenta de atención web (la página) y del
+    //          ejecutivo que atiende (tu compañero/a)
     // ================================================================
 
 
     // ================================================================
-    // PARTE C: pega aquí la función abrirAtencion(actividad)
+    // PARTE C: pega aquí las funciones abrirAtencion() y videollamada()
     // ================================================================
 
   </script>

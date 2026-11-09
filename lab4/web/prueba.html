@@ -39,11 +39,6 @@
       <label for="destino">Correo de tu compañero(a)</label>
       <input id="destino" type="email" placeholder="correo@ejemplo.com">
 
-      <label for="actividad">Abrir el widget en</label>
-      <select id="actividad">
-        <option value="message">Mensajes (chat)</option>
-        <option value="meet">Llamada (video)</option>
-      </select>
 
       <button id="cargar">Cargar widget</button>
       <button id="quitar">Quitar widget</button>
@@ -100,7 +95,7 @@
           accessToken: token,                 // quién usa el widget (tú)
           destinationType: "email",           // con quién se conversa: por correo
           destinationId: destino,
-          initialActivity: document.getElementById("actividad").value,
+          initialActivity: "message",
           onEvent: registrar                  // función que recibe los eventos
         });
         registrar("widget cargado para " + destino);
